@@ -1,0 +1,27 @@
+﻿@model List<ExpenseTracker.Models.Expense>
+@{
+    ViewData["Title"] = "Expenses";
+}
+
+<h2>My Expenses</h2>
+<a href="/Expense/Create">Add Expense</a>
+<p><strong>Total:</strong> ₹@ViewBag.Total</p>
+<table border="1">
+    <tr>
+        <th>Title</th>
+        <th>Amount</th>
+        <th>Category</th>
+        <th>Date</th>
+        <th>Action</th>
+    </tr>
+    @foreach (var exp in Model)
+    {
+        <tr>
+            <td>@exp.Title</td>
+            <td>₹@exp.Amount</td>
+            <td>@exp.Category</td>
+            <td>@exp.Date.ToShortDateString()</td>
+            <td><a href="/Expense/Delete/@exp.Id">Delete</a></td>
+        </tr>
+    }
+</table>
