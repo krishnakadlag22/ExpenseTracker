@@ -21,7 +21,9 @@
             <td>₹@exp.Amount</td>
             <td>@exp.Category</td>
             <td>@exp.Date.ToShortDateString()</td>
-            <td><a href="/Expense/Delete/@exp.Id">Delete</a></td>
+            <td>
+                <a href="Expense/Edit/@exp.Id">Edit</a>|
+                <a href="/Expense/Delete/@exp.Id">Delete</a></td>
         </tr>
     }
 </table>

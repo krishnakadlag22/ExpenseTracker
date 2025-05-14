@@ -1,18 +1,7 @@
-﻿//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
-
-//namespace ExpenseTracker.Controllers
-//{
-//    [Route("api/[controller]")]
-//    [ApiController]
-//    public class ExpenseApiController : ControllerBase
-//    {
-//    }
-//}
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ExpenseTracker.Models;
-using System.Collections.Generic;
-using System;
+using ExpenseTracker.Data;
+using System.Linq;
 
 namespace ExpenseTracker.Controllers
 {
@@ -20,27 +9,55 @@ namespace ExpenseTracker.Controllers
     [ApiController]
     public class ExpenseApiController : ControllerBase
     {
-        // Sample in-memory data (just for demo)
-        private static List<Expense> Expenses = new List<Expense>
+        private readonly ExpenseDbContext _context;
+
+        public ExpenseApiController(ExpenseDbContext context)
         {
-            new Expense { Id = 1, Title = "Groceries", Amount = 1000, Category = "Food", Date = DateTime.Today },
-            new Expense { Id = 2, Title = "Rent", Amount = 5000, Category = "Housing", Date = DateTime.Today }
-        };
+            _context = context;
+        }
 
         // GET: api/expenseapi
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Ok(Expenses);
+            var expenses = _context.Expenses.ToList();
+            return Ok(expenses);
+        }
+
+        // GET: api/expenseapi/5
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            var expense = _context.Expenses.FirstOrDefault(e => e.Id == id);
+            if (expense == null)
+                return NotFound();
+
+            return Ok(expense);
         }
 
         // POST: api/expenseapi
         [HttpPost]
-        public IActionResult Add(Expense expense)
+        public IActionResult Add([FromBody]Expense expense)
         {
-            expense.Id = Expenses.Count + 1;
-            Expenses.Add(expense);
-            return Ok(expense);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            _context.Expenses.Add(expense);
+            _context.SaveChanges();
+            return CreatedAtAction(nameof(Get), new { id = expense.Id }, expense);
+        }
+
+        // DELETE: api/expenseapi/5
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var item = _context.Expenses.FirstOrDefault(x => x.Id == id);
+            if (item == null)
+                return NotFound();
+
+            _context.Expenses.Remove(item);
+            _context.SaveChanges();
+            return NoContent();
         }
     }
 }
